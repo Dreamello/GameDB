@@ -1,3 +1,6 @@
+drop table Reviews;
+-- cascade delete from games
+
 drop table Friends;
 -- cascade delete from members
 
@@ -30,6 +33,10 @@ drop table Members cascade constraints;
 
 drop table Wishlists cascade constraints;
 -- cascade delete from members
+
+drop view capcomgame;
+
+drop view devNameOnly;
 
 CREATE TABLE Developers
     (Name        VARCHAR(40),
@@ -91,7 +98,7 @@ ADD CONSTRAINT CartFK
 FOREIGN KEY (Email) REFERENCES Customers(Email)
                          ON DELETE CASCADE
                          DEFERRABLE INITIALLY DEFERRED;
-                         
+
 
 commit;
 
@@ -106,8 +113,8 @@ grant select on Members to public;
 
 commit;
 
-CREATE TABLE Wishlists         
-    (WID         INTEGER UNIQUE,       
+CREATE TABLE Wishlists
+    (WID         INTEGER UNIQUE,
      Email       VARCHAR(40) NOT NULL,
      PRIMARY KEY (WID, Email));
 
@@ -117,7 +124,7 @@ ALTER TABLE Members
 ADD CONSTRAINT MembersFK
 FOREIGN KEY (WID) REFERENCES Wishlists(WID) DEFERRABLE INITIALLY DEFERRED;
 
-ALTER TABLE Wishlists   
+ALTER TABLE Wishlists
 ADD CONSTRAINT WishlistsFK
 FOREIGN KEY (Email) REFERENCES Members(Email)
                          ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -151,7 +158,7 @@ grant select on AddRemoveFromCart to public;
 
 commit;
 
-CREATE TABLE AddRemoveFromWishlist 
+CREATE TABLE AddRemoveFromWishlist
     (WGID         INTEGER,
      WID          INTEGER,
      PRIMARY KEY (WGID, WID),
@@ -211,6 +218,20 @@ CREATE TABLE Friends
                                ON DELETE CASCADE);
 
 grant select on Friends to public;
+
+commit;
+
+CREATE TABLE Reviews
+    (RID        INTEGER,
+    Rating      INTEGER ,
+    GID         INTEGER ,
+    Intro       VARCHAR(80),
+    Link        VARCHAR(80),
+    PRIMARY KEY (RID),
+    FOREIGN KEY (GID)   REFERENCES Games(GID)
+                        ON DELETE CASCADE);
+
+grant select on Reviews to public;
 
 commit;
 
@@ -451,13 +472,13 @@ INSERT INTO AddRemoveFromCart
 VALUES (1012,6);
 
 INSERT INTO AddRemoveFromWishlist
-VALUES (1013,1);
+VALUES (1003,1);
 
 INSERT INTO AddRemoveFromWishlist
 VALUES (1014,1);
 
 INSERT INTO AddRemoveFromWishlist
-VALUES (1015,1);
+VALUES (1005,1);
 
 INSERT INTO AddRemoveFromWishlist
 VALUES (1016,1);
@@ -518,5 +539,11 @@ VALUES ('billgates@gmail.com','sundarpichai@gmail.com');
 
 INSERT INTO Friends
 VALUES ('billgates@gmail.com','elonmusk@gmail.com');
+
+create view capcomgame
+as select name, devname from games where devname = 'Capcom';
+
+create view devNameOnly
+as select unique name from Developers;
 
 COMMIT;
