@@ -1,3 +1,6 @@
+<!--Project File for UBC CPSC 304
+  David (Yu Feng) Guo, Yixue Xu, Brandon Yip, Niloofar Gharavi -->
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -42,7 +45,7 @@
     <td><input type="text" name="gameName" size="20"></td>
     <td><input type="text" name="gameID" size="10"></td>
     <td><input type="text" name="gamePrice" size="8"></td>
-    <td><input type="text" name="gameReleaseDate" size="15"></td>
+    <td><input type="date" name="gameReleaseDate" size="15"></td>
     <td><input type="text" name="gameDevName" size="20"></td>
   </tr>
   <tr>
@@ -216,6 +219,17 @@
   </tr>
 </table></p>
 </form>
+
+<h3>Division Queries</h3>
+<form method="POST" action="developer.php">
+
+<p><table>
+  <tr>
+    <td><input type="submit" value="Find Games Purchased by Every Customer" name="divide1"></td>
+    <td><input type="submit" value="Find Customers who Purchased Every Game" name="divide2"></td>
+  </tr>
+</table></p>
+</form>
 </div>
 
 
@@ -352,6 +366,28 @@ function printSumDevResult($result) { //prints results from a select statement
   echo "</table>";
 }
 
+function printDivideOneResult($result) { //prints results from a select statement
+  echo "<center><h2>Games Purchased by EVERY Customer<h2></center>";
+	echo "<table id=\"devTable\">";
+	echo "<tr><td>Game Name</td><td>Games ID</td></tr>";
+
+	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
+    echo "<tr><td>" . $row[0] . "</td><td>" . $row[1] . "</td></tr>" ; //or just use "echo $row[0]"
+	}
+  echo "</table>";
+}
+
+function printDivideTwoResult($result) { //prints results from a select statement
+  echo "<center><h2>Customer who Purchased EVERY Game<h2></center>";
+	echo "<table id=\"devTable\">";
+	echo "<tr><td>Customer Email</td></tr>";
+
+	while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
+    echo "<tr><td>" . $row[0] . "</td></tr>" ; //or just use "echo $row[0]"
+	}
+  echo "</table>";
+}
+
 // Connect Oracle...
 if ($db_conn) {
 
@@ -385,11 +421,7 @@ if ($db_conn) {
 			executeBoundSQL("INSERT INTO Games
       VALUES (:bind1, :bind2, :bind3, :bind4, :bind5, :bind6)", $alltuples);
       OCICommit($db_conn);
-      
-      if ($_POST && $success) {
-        //POST-REDIRECT-GET -- See http://en.wikipedia.org/wiki/Post/Redirect/Get
-        header("location: developer.php");
-      }
+
         // Select data...
         $result = executePlainSQL("select genre, name, gid, price, to_char(releasedate, 'YYYY-MM-DD') as ReleaseDate, devname from games");
         printGamesResult($result);
@@ -414,10 +446,6 @@ if ($db_conn) {
           WHERE GID=:bind5", $alltuples);
         OCICommit($db_conn);
 
-        if ($_POST && $success) {
-          //POST-REDIRECT-GET -- See http://en.wikipedia.org/wiki/Post/Redirect/Get
-          header("location: developer.php");
-        } 
           // Select data...
           $result = executePlainSQL("select genre, name, gid, price, to_char(releasedate, 'YYYY-MM-DD') as ReleaseDate, devname from games");
           printGamesResult($result);
@@ -436,10 +464,6 @@ if ($db_conn) {
         executeBoundSQL("DELETE FROM Games WHERE GID=:bind1", $alltuples);
         OCICommit($db_conn);
 
-        if ($_POST && $success) {
-          //POST-REDIRECT-GET -- See http://en.wikipedia.org/wiki/Post/Redirect/Get
-          header("location: developer.php");
-        } 
           // Select data...
           $result = executePlainSQL("select genre, name, gid, price, to_char(releasedate, 'YYYY-MM-DD') as ReleaseDate, devname from games");
           printGamesResult($result);
@@ -463,10 +487,6 @@ if ($db_conn) {
         VALUES (:bind1, :bind2, :bind3, :bind4, :bind5)", $alltuples);
         OCICommit($db_conn);
 
-        if ($_POST && $success) {
-          //POST-REDIRECT-GET -- See http://en.wikipedia.org/wiki/Post/Redirect/Get
-          header("location: developer.php");
-        }
           // Select data...
           $result = executePlainSQL("select eventindex, ogid, saleprice, to_char(startdate, 'YYYY-MM-DD'), to_char(enddate, 'YYYY-MM-DD') from OnSaleList");
           printSaleResult($result);
@@ -489,10 +509,6 @@ if ($db_conn) {
           WHERE EventIndex=:bind3", $alltuples);
         OCICommit($db_conn);
         
-        if ($_POST && $success) {
-          //POST-REDIRECT-GET -- See http://en.wikipedia.org/wiki/Post/Redirect/Get
-          header("location: developer.php");
-        }
           // Select data...
           $result = executePlainSQL("select eventindex, ogid, saleprice, to_char(startdate, 'YYYY-MM-DD'), to_char(enddate, 'YYYY-MM-DD') from OnSaleList");
           printSaleResult($result);
@@ -511,10 +527,6 @@ if ($db_conn) {
         executeBoundSQL("DELETE FROM OnSaleList WHERE EventIndex=:bind1", $alltuples);
         OCICommit($db_conn);
 
-        if ($_POST && $success) {
-          //POST-REDIRECT-GET -- See http://en.wikipedia.org/wiki/Post/Redirect/Get
-          header("location: developer.php");
-        }
           // Select data...
           $result = executePlainSQL("select eventindex, ogid, saleprice, to_char(startdate, 'YYYY-MM-DD'), to_char(enddate, 'YYYY-MM-DD') from OnSaleList");
           printSaleResult($result);
@@ -537,10 +549,6 @@ if ($db_conn) {
           WHERE Name=:bind3", $alltuples);
         OCICommit($db_conn);
 
-        if ($_POST && $success) {
-          //POST-REDIRECT-GET -- See http://en.wikipedia.org/wiki/Post/Redirect/Get
-          header("location: developer.php");
-        }
           // Select data...
           $result = executePlainSQL("select * from Developers");
           printDevResult($result);
@@ -560,7 +568,31 @@ if ($db_conn) {
       // Select data...
       $result = executePlainSQL("Select email, sum(price) from purchases p, games g where p.gid=g.gid Group by email ");
       printSumCustResult($result);
-  } 
+  }  else
+  if (array_key_exists('divide1', $_POST)) {
+  
+    // Select data...
+    $result = executePlainSQL("SELECT g.name, g.gid
+    FROM games g
+    WHERE NOT EXISTS ((SELECT c.email
+            FROM customers c)
+            MINUS (SELECT p.email
+            FROM purchases p
+            WHERE g.gid=p.gid))");
+    printDivideOneResult($result);
+} else
+if (array_key_exists('divide2', $_POST)) {
+
+  // Select data...
+  $result = executePlainSQL("SELECT c.email
+  FROM customers c
+  WHERE NOT EXISTS ((SELECT g.gid
+   FROM games g)
+   MINUS (SELECT p.gid
+   FROM purchases p
+   WHERE p.email=c.email))");
+  printDivideTwoResult($result);
+} 
       
       else
 				if (array_key_exists('dostuff', $_POST)) {
